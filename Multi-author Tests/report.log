@@ -1,0 +1,36 @@
+2023-08-04 16:31:00,130 - pyswarms.backend.generators - ERROR - Bounds and/or init_pos should be of size (3,)
+Traceback (most recent call last):
+  File "C:\Users\tax2f\AppData\Local\Programs\Python\Python310\lib\site-packages\pyswarms\backend\generators.py", line 74, in generate_swarm
+    lb, ub = bounds
+ValueError: too many values to unpack (expected 2)
+2023-08-04 16:34:41,037 - pyswarms.single.global_best - INFO - Optimize for 100 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-04 16:39:08,626 - pyswarms.single.global_best - INFO - Optimize for 100 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-04 16:41:45,622 - pyswarms.single.global_best - INFO - Optimize for 100 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-04 16:49:52,158 - pyswarms.single.global_best - INFO - Optimize for 100 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-04 16:52:40,529 - pyswarms.single.global_best - INFO - Optimize for 100 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-04 16:57:53,658 - pyswarms.single.global_best - INFO - Optimize for 50 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-04 21:42:44,706 - pyswarms.single.global_best - INFO - Optimize for 50 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-05 04:06:13,191 - pyswarms.single.global_best - INFO - Optimization finished | best cost: -0.9168960043850133, best pos: [82.36011087  3.73974493  5.16167072]
+2023-08-05 07:21:19,825 - pyswarms.single.global_best - INFO - Optimize for 100 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-05 10:23:57,923 - pyswarms.single.global_best - INFO - Optimize for 100 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-05 10:34:01,327 - pyswarms.single.global_best - INFO - Optimize for 100 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-05 10:41:22,325 - pyswarms.single.global_best - INFO - Optimize for 100 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-05 14:41:47,666 - pyswarms.single.global_best - INFO - Optimization finished | best cost: -0.7448096161498844, best pos: [117.72749552   3.19541261   6.89557295]
+2023-08-05 14:45:48,977 - pyswarms.single.global_best - INFO - Optimize for 100 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-05 18:33:44,302 - pyswarms.single.global_best - INFO - Optimization finished | best cost: -0.7172144242248264, best pos: [172.78941158   3.30422181   4.45650028]
+2023-08-05 22:33:38,154 - pyswarms.single.global_best - INFO - Optimize for 100 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-05 23:47:34,779 - pyswarms.single.global_best - INFO - Optimize for 100 iters with {'c1': 0.9, 'c2': 0.9, 'w': 0.9}
+2023-08-06 03:50:43,771 - pyswarms.single.global_best - INFO - Optimization finished | best cost: -0.9168960043850133, best pos: [172.03321467   3.28122024   3.68831688]
+2023-08-07 10:31:32,006 - pyswarms.single.global_best - INFO - Optimize for 50 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-07 12:11:38,986 - pyswarms.single.global_best - INFO - Optimization finished | best cost: 0.2827855757751736, best pos: [90.06162166  3.05118956  5.22065587]
+2023-08-07 20:24:13,528 - pyswarms.backend.generators - ERROR - generate_swarm() takes an int for n_particles and dimensions and an array for bounds
+Traceback (most recent call last):
+  File "C:\Users\tax2f\AppData\Local\Programs\Python\Python310\lib\site-packages\pyswarms\backend\generators.py", line 81, in generate_swarm
+    pos = center * np.random.uniform(
+  File "mtrand.pyx", line 1132, in numpy.random.mtrand.RandomState.uniform
+TypeError: Cannot cast array data from dtype('O') to dtype('float64') according to the rule 'safe'
+2023-08-07 20:53:00,456 - pyswarms.single.global_best - INFO - Optimize for 200 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-07 21:10:09,844 - pyswarms.single.global_best - INFO - Optimize for 200 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-07 21:15:46,775 - pyswarms.single.global_best - INFO - Optimize for 200 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-07 21:22:00,652 - pyswarms.single.global_best - INFO - Optimize for 200 iters with {'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+2023-08-08 08:36:08,677 - pyswarms.single.global_best - INFO - Optimization finished | best cost: 0.18743194077909187, best pos: [98.41503068  5.93633211  5.70036357  6.07772678  0.87312211  0.88702561]
