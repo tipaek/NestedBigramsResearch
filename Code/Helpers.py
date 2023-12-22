@@ -88,13 +88,11 @@ def encode_nodes_with_BERT(nodes, tokenizer, model, batch_size=100):
     result = []
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
-    #nodes = edit_nodes(nodes)
     for i in range(0, len(nodes), batch_size):
         batch = nodes[i:i+batch_size]
         inputs = []
         max_length = 0
         for node in batch:
-            #print(node)
             try:
                 source_code = str(node)
             except AttributeError:

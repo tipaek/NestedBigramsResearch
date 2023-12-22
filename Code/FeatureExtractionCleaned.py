@@ -6,34 +6,21 @@ import os
 import chardet
 from pathlib import Path
 
-# for bigrams and divergence
-from kmedoids import KMedoids
 
 from HelpersCleaned import get_bigrams, get_features, bigram_freq, bigram_to_str, calculate_kl_divergence, get_nodes_in_range, encode_nodes_with_BERT, encode_nodes_with_BERT_weighted, add_xmeans_clusters, calculate_kl_divergence2
 from javalang.parse import parse
-from javalang.tree import *
-
-# for clustering
-from scipy.cluster.hierarchy import dendrogram, linkage
-from sklearn.cluster import AgglomerativeClustering
-from sklearn.mixture import GaussianMixture
-from sklearn.cluster import KMeans
-#from sklearn_extra.cluster import KMedoids
-
-from scipy.stats import entropy
-
-from multiprocessing import Pool
 
 from transformers import BertTokenizer, BertModel, DistilBertTokenizer, DistilBertModel
-import torch
+
 def readFilesWithBERT(file_path, groupLength, eps=1e-9):
     data = []
     bert_columns = set()
+    col_index = 0
     code_group_lengths = []
     tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
     model = DistilBertModel.from_pretrained('distilbert-base-uncased')
 
-    def process_file(file_name, file_path):
+    def process_file(file_name, file_path, col_index):
         try:
             with open(file_path, 'rb') as f:
                 rawdata = f.read()
@@ -44,7 +31,9 @@ def readFilesWithBERT(file_path, groupLength, eps=1e-9):
                 num_groups = code.count('\n') // groupLength
                 if (len(code) % groupLength != 0): num_groups += 1
                 code_groups = [code[i:i + groupLength] for i in range(num_groups)]
+
                 for i, code_group in enumerate(code_groups):
+                    node_embeddings_dict = {}
                     start_line = i * groupLength
                     end_line = (i + 1) * groupLength - 1
                     row_range = f'{start_line}-{end_line}'
@@ -53,13 +42,15 @@ def readFilesWithBERT(file_path, groupLength, eps=1e-9):
                     for node, emb in node_embeddings:
                         node_str = str(node)
                         bert_columns.add(node_str)
+                        node_embeddings_dict[node_str] = node_embeddings_dict.get(node_str, 0) + emb
                     features = get_features(code_group)
 
                     # Store the length of the code group
                     code_group_lengths.append(len(code_group))
 
-                    data.append([row_range, file_name, file_path] + features + [
-                        emb.mean() if node_str == str(node) else 0 for node_str in bert_columns])
+                    data.append([row_range, file_name, file_path] + features +
+                                [node_embeddings_dict.get(node_str, [0]).mean() for node_str in bert_columns])
+
         except Exception as e:
             raise Exception(f'An error occurred while processing file {file_name}: {e}')
             #print(f'An error occurred while processing file {file_name}: {e}')
