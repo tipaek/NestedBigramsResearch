@@ -1,5 +1,7 @@
 from javalang.tree import *
 
+import pandas as pd
+
 from collections import Counter
 import numpy as np
 import re
@@ -9,7 +11,7 @@ import base64
 
 from scipy.stats import entropy
 
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, OPTICS
 from kneed import KneeLocator
 
 import torch
@@ -201,18 +203,21 @@ def calculate_kl_divergence(df, ignore_cols, code_group_lengths, eps=1e-9):
 
 # same as above except is with respect to the cluster labels instead(note: this is computationally pricey)
 def calculate_kl_divergence2(df, ignore_cols, code_group_lengths, eps=1e-9):
+    pd.set_option('display.max_rows', None)
+    df_copy = df.copy()
     # Calculate the standard deviation of columns for each cluster, ignoring the specified columns
-    dists = [df[df['Cluster'] == cluster].drop(ignore_cols, axis=1).mean() + eps for cluster in df['Cluster'].unique()]
+    dists = [df_copy[df_copy['Cluster'] == cluster].drop(ignore_cols, axis=1).mean() for cluster in df['Cluster'].unique()]
+    dists = [(np.abs(dist) + eps) / np.sum(dist.abs() + eps) for dist in dists]
 
     # Calculate the KL divergence between the standard deviation of each row and each cluster
     kl_divergences = []
-    for i, row in df.drop(ignore_cols, axis=1).iterrows():
-        dist_row = row + eps
+    for i, row in df_copy.drop(ignore_cols, axis=1).iterrows():
+        dist_row = np.abs(row) + eps
         kl_divergence = [entropy(dist_row, dist) for dist in dists]
         kl_divergences.append(kl_divergence)
 
     # Normalize the KL divergence by dividing by the length of each code group
-    normalized_kl_divergences = [[kl_div / length for kl_div in kl_divergence] for kl_divergence, length in zip(kl_divergences, code_group_lengths)]
+    normalized_kl_divergences = [[kl_div / code_group_lengths[i] for kl_div in kl_divergence] for kl_divergence in kl_divergences]
 
     # Add normalized KL divergence values to the dataframe
     for i, cluster in enumerate(df['Cluster'].unique()):
@@ -304,6 +309,15 @@ def add_xmeans_clusters(df, ignore_cols):
 
     # Add cluster labels to the dataframe
     df['Cluster'] = [label for cluster in clusters for label in cluster]
+
+def add_optics_clusters(df, ignore_cols, size):
+    X = df.drop(ignore_cols, axis=1).values
+
+    optics = OPTICS(min_samples=2*int(np.sqrt(size)))
+    optics.fit(X)
+    clusters = optics.labels_
+
+    df['Cluster'] = clusters
 
 
 

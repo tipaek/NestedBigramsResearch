@@ -7,7 +7,7 @@ import chardet
 from pathlib import Path
 
 
-from HelpersCleaned import get_bigrams, get_features, bigram_freq, bigram_to_str, calculate_kl_divergence, get_nodes_in_range, encode_nodes_with_BERT, encode_nodes_with_BERT_weighted, add_xmeans_clusters, calculate_kl_divergence2
+from HelpersCleaned import get_bigrams, get_features, bigram_freq, bigram_to_str, calculate_kl_divergence, get_nodes_in_range, encode_nodes_with_BERT, encode_nodes_with_BERT_weighted, add_xmeans_clusters, calculate_kl_divergence2, add_optics_clusters, normalize
 from javalang.parse import parse
 
 from transformers import BertTokenizer, BertModel, DistilBertTokenizer, DistilBertModel
@@ -15,12 +15,11 @@ from transformers import BertTokenizer, BertModel, DistilBertTokenizer, DistilBe
 def readFilesWithBERT(file_path, groupLength, eps=1e-9):
     data = []
     bert_columns = set()
-    col_index = 0
     code_group_lengths = []
     tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
     model = DistilBertModel.from_pretrained('distilbert-base-uncased')
 
-    def process_file(file_name, file_path, col_index):
+    def process_file(file_name, file_path):
         try:
             with open(file_path, 'rb') as f:
                 rawdata = f.read()
@@ -49,7 +48,7 @@ def readFilesWithBERT(file_path, groupLength, eps=1e-9):
                     code_group_lengths.append(len(code_group))
 
                     data.append([row_range, file_name, file_path] + features +
-                                [node_embeddings_dict.get(node_str, [0]).mean() for node_str in bert_columns])
+                                [node_embeddings_dict.get(node_str).mean() if node_str in node_embeddings_dict else 0 for node_str in bert_columns])
 
         except Exception as e:
             raise Exception(f'An error occurred while processing file {file_name}: {e}')
@@ -75,12 +74,12 @@ def readFilesWithBERT(file_path, groupLength, eps=1e-9):
                'Mean Line Length', 'Mean Comment Length'] + list(bert_columns)
     df = pd.DataFrame(data, columns=columns)
     df.fillna(0, inplace=True)
-
+    df = normalize(df)
     # Labeling
     df['Written'] = df['File Path'].apply(lambda x: 1 if 'Anomalous' in x else 0)
 
     ignore_cols = ['Written', 'File Path', 'Row Range', 'File Name']
-    add_xmeans_clusters(df, ignore_cols)
+    add_optics_clusters(df, ignore_cols, len(df))
 
     #KL Divergence
     df = calculate_kl_divergence2(df, ignore_cols, code_group_lengths)
