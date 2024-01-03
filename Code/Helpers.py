@@ -11,7 +11,7 @@ from scipy.stats import entropy
 import chardet
 from pathlib import Path
 
-from sklearn.cluster import DBSCAN
+from sklearn.cluster import DBSCAN, OPTICS
 
 from sklearn.cluster import KMeans
 from kneed import KneeLocator
@@ -19,6 +19,8 @@ from sklearn.preprocessing import StandardScaler
 
 import torch
 import copy
+
+import pandas as pd
 
 
 # generates bigrams from start_line <= node.position.line <= end_line given ast node(in this case, it's the entirety of the tree)
@@ -241,6 +243,30 @@ def calculate_kl_divergence(df, ignore_cols, code_group_lengths, eps=1e-9):
     normalized_kl_divergence_1 = [kl_div / length for kl_div, length in zip(kl_divergence_1, code_group_lengths)]
     return normalized_kl_divergence_0, normalized_kl_divergence_1
 
+# same as above except is with respect to the cluster labels instead(note: this is computationally pricey)
+def calculate_kl_divergence2(df, ignore_cols, code_group_lengths, eps=1e-9):
+    pd.set_option('display.max_rows', None)
+    df_copy = df.copy()
+    # Calculate the standard deviation of columns for each cluster, ignoring the specified columns
+    dists = [df_copy[df_copy['Cluster'] == cluster].drop(ignore_cols, axis=1).mean() for cluster in df['Cluster'].unique()]
+    dists = [(np.abs(dist) + eps) / np.sum(dist.abs() + eps) for dist in dists]
+
+    # Calculate the KL divergence between the standard deviation of each row and each cluster
+    kl_divergences = []
+    for i, row in df_copy.drop(ignore_cols, axis=1).iterrows():
+        dist_row = np.abs(row) + eps
+        kl_divergence = [entropy(dist_row, dist) for dist in dists]
+        kl_divergences.append(kl_divergence)
+
+    # Normalize the KL divergence by dividing by the length of each code group
+    normalized_kl_divergences = [[kl_div / code_group_lengths[i] for kl_div in kl_divergence] for kl_divergence in kl_divergences]
+
+    # Add normalized KL divergence values to the dataframe
+    for i, cluster in enumerate(df['Cluster'].unique()):
+        df[f'KL Divergence {cluster}'] = [kl_div[i] for kl_div in normalized_kl_divergences]
+
+    return df
+
 # gets rid of special characters in feature labels to be used for fitting for some networks that don't like that
 def clean_feature_names(feature_names):
     remove_chars = '[]{}:,()_'
@@ -421,6 +447,34 @@ def objective_function2(params, clf, X_train, y_train, X, y):
 
     # Return the array of objective function values for all particles
     return obj
+
+def add_optics_clusters(df, ignore_cols, size):
+    X = df.drop(ignore_cols, axis=1).values
+
+    optics = OPTICS(min_samples=2*int(np.sqrt(size)))
+    optics.fit(X)
+    clusters = optics.labels_
+
+    df['Cluster'] = clusters
+
+def normalize(df):
+    ignore_cols = ['Row Range', 'Written', 'File Name', 'File Path']
+
+    # Create a copy of the input dataframe to avoid modifying it
+    df_normalized = df.copy()
+    #df.columns = df.columns.astype(str)
+
+    # Normalize each column in the dataframe, ignoring the specified columns and columns with non-numeric data types
+    for col in df.columns:
+        if col not in ignore_cols:
+            # Calculate the 5th and 95th percentiles of the column
+            xmin = df[col].quantile(0.05)
+            xmax = df[col].quantile(0.95)
+            #print(f'xmax: {xmax} \nmxmin: {xmin}')
+            # Normalize the values in the column using the specified equation, if xmax - xmin is not 0
+            if type(xmax) == float and xmax - xmin != 0:
+                df_normalized[col] = (df[col] - xmin) / (xmax - xmin)
+    return df_normalized
 
 
 

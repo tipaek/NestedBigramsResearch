@@ -112,39 +112,6 @@ def encode_nodes_with_BERT(nodes, tokenizer, model, batch_size=100):
         result.extend(list(zip(batch, embs)))
     return result
 
-def encode_nodes_with_BERT_weighted(nodes, tokenizer, model, batch_size=100):
-    result = []
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.to(device)
-    cleaned_nodes=nodes
-    for i in range(0, len(cleaned_nodes), batch_size):
-        batch = cleaned_nodes[i:i+batch_size]
-        inputs = []
-        attention_masks = []
-        max_length = 0
-        for node in batch:
-            try:
-                source_code = str(node)
-            except AttributeError:
-                source_code = f"{node.__class__.__name__} at line {node.position.line}"
-            print(source_code)
-            encoded_input = tokenizer.encode_plus(source_code, return_tensors='pt', max_length=512, truncation=True, padding='max_length')
-            input_ids = encoded_input['input_ids']
-            attention_mask = encoded_input['attention_mask']
-            inputs.append(input_ids)
-            attention_masks.append(attention_mask)
-            max_length = max(max_length, input_ids.shape[1])
-        inputs = torch.cat(inputs).to(device)
-        attention_masks = torch.cat(attention_masks).to(device)
-        with torch.no_grad():
-            outputs = model(inputs, attention_mask=attention_masks)
-            embs = outputs.last_hidden_state
-            # calculate weighted average using attention mask as weights
-            embs = (embs * attention_masks.unsqueeze(-1)).sum(dim=1) / attention_masks.sum(dim=1).unsqueeze(-1)
-            embs = embs.cpu().numpy()
-        result.extend(list(zip(batch, embs)))
-    return result
-
 # returns a list of features to add to the dataframe
 def get_features(code_group):
     whitespace_ratio = code_group.count(' ') / len(code_group)

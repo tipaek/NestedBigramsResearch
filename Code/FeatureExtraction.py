@@ -10,7 +10,9 @@ from pathlib import Path
 from kmedoids import KMedoids
 
 from Helpers import get_bigrams, get_features, bigram_freq, bigram_to_str, calculate_kl_divergence, \
-    get_bigrams_in_range, get_nodes_in_range, encode_nodes_with_BERT, encode_nodes_with_BERT_weighted
+    get_bigrams_in_range, get_nodes_in_range, encode_nodes_with_BERT, encode_nodes_with_BERT_weighted, add_optics_clusters, \
+    normalize
+
 from javalang.parse import parse
 from javalang.tree import *
 
@@ -25,9 +27,169 @@ from scipy.stats import entropy
 
 from multiprocessing import Pool
 
-from transformers import BertTokenizer, BertModel, DistilBertTokenizer, DistilBertModel
+from transformers import BertTokenizer, BertModel, DistilBertTokenizer, DistilBertModel, AutoTokenizer, AutoModel
 import torch
+
+#codebert nested bigrams, no KL divergence
+def CodeBERT_NB_nKL(file_path, groupLength, eps=1e-9):
+    data = []
+    bert_columns = set()
+    code_group_lengths = []
+    #tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+    #model = DistilBertModel.from_pretrained('distilbert-base-uncased')
+    tokenizer = AutoTokenizer.from_pretrained('microsoft/codebert-base')
+    model = AutoModel.from_pretrained('microsoft/codebert-base')
+
+    def process_file(file_name, file_path):
+        try:
+            with open(file_path, 'rb') as f:
+                rawdata = f.read()
+                encoding = chardet.detect(rawdata)['encoding']
+            with open(file_path, 'r', encoding=encoding) as f:
+                code = f.read()
+                tree = parse(code)
+                num_groups = code.count('\n') // groupLength
+                if (len(code) % groupLength != 0): num_groups += 1
+                code_groups = [code[i:i + groupLength] for i in range(num_groups)]
+
+                for i, code_group in enumerate(code_groups):
+                    node_embeddings_dict = {}
+                    start_line = i * groupLength
+                    end_line = (i + 1) * groupLength - 1
+                    row_range = f'{start_line}-{end_line}'
+                    nodes = get_bigrams(tree, start_line, end_line)
+                    node_embeddings = encode_nodes_with_BERT(nodes, tokenizer, model)
+                    for node, emb in node_embeddings:
+                        node_str = str(node)
+                        for num in range(len(emb)):
+                            temp = node_str + str(num)
+                            bert_columns.add(temp)
+                            node_embeddings_dict[temp] = node_embeddings_dict.get(temp, 0) + emb[num]
+                    features = get_features(code_group)
+
+                    # Store the length of the code group
+                    code_group_lengths.append(len(code_group))
+
+                    data.append([row_range, file_name, file_path] + features +
+                                [node_embeddings_dict.get(node_str) if node_str in node_embeddings_dict else 0 for node_str in bert_columns])
+
+        except Exception as e:
+            raise Exception(f'An error occurred while processing file {file_name}: {e}')
+            #print(f'An error occurred while processing file {file_name}: {e}')
+
+    def process_directory(dir_path, processed_dirs=set(), processed_files=set()):
+        for root, dirs, files in os.walk(dir_path):
+            for file_name in files:
+                if file_name.endswith('.java'):
+                    file_path = os.path.join(root, file_name)
+                    if os.path.realpath(file_path) not in processed_files:
+                        processed_files.add(os.path.realpath(file_path))
+                        print(file_name)
+                        process_file(file_name, file_path)
+            for dir_name in dirs:
+                dir_path = os.path.join(root, dir_name)
+                if os.path.realpath(dir_path) not in processed_dirs:
+                    processed_dirs.add(os.path.realpath(dir_path))
+                    process_directory(dir_path, processed_dirs, processed_files)
+
+    process_directory(file_path)
+    columns = ['Row Range', 'File Name', 'File Path', 'Whitespace Ratio', 'Statement Words', 'Tabs', 'Underscores', 'Empty Lines',
+               'Mean Line Length', 'Mean Comment Length'] + list(bert_columns)
+    df = pd.DataFrame(data, columns=columns)
+    df.fillna(0, inplace=True)
+    df = normalize(df)
+    print('normalization finished')
+    # Labeling
+    df['Written'] = df['File Path'].apply(lambda x: 1 if 'Anomalous' in x else 0)
+
+    ignore_cols = ['Written', 'File Path', 'Row Range', 'File Name']
+    add_optics_clusters(df, ignore_cols, len(df))
+    print('optics finished')
+
+    #KL Divergence
+    #df = calculate_kl_divergence2(df, ignore_cols, code_group_lengths)
+
+    return df
+
+#codebert/distilbert nested bigrams
 def readFilesWithBERT(file_path, groupLength, eps=1e-9):
+    data = []
+    bert_columns = set()
+    code_group_lengths = []
+    #tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
+    #model = DistilBertModel.from_pretrained('distilbert-base-uncased')
+    tokenizer = AutoTokenizer.from_pretrained('microsoft/codebert-base')
+    model = AutoModel.from_pretrained('microsoft/codebert-base')
+
+    def process_file(file_name, file_path):
+        try:
+            with open(file_path, 'rb') as f:
+                rawdata = f.read()
+                encoding = chardet.detect(rawdata)['encoding']
+            with open(file_path, 'r', encoding=encoding) as f:
+                code = f.read()
+                tree = parse(code)
+                num_groups = code.count('\n') // groupLength
+                if (len(code) % groupLength != 0): num_groups += 1
+                code_groups = [code[i:i + groupLength] for i in range(num_groups)]
+
+                for i, code_group in enumerate(code_groups):
+                    node_embeddings_dict = {}
+                    start_line = i * groupLength
+                    end_line = (i + 1) * groupLength - 1
+                    row_range = f'{start_line}-{end_line}'
+                    nodes = get_bigrams(tree, start_line, end_line)
+                    node_embeddings = encode_nodes_with_BERT(nodes, tokenizer, model)
+                    for node, emb in node_embeddings:
+                        node_str = str(node)
+                        bert_columns.add(node_str)
+                        node_embeddings_dict[node_str] = node_embeddings_dict.get(node_str, 0) + emb
+                    features = get_features(code_group)
+
+                    # Store the length of the code group
+                    code_group_lengths.append(len(code_group))
+
+                    data.append([row_range, file_name, file_path] + features +
+                                [node_embeddings_dict.get(node_str).mean() if node_str in node_embeddings_dict else 0 for node_str in bert_columns])
+
+        except Exception as e:
+            raise Exception(f'An error occurred while processing file {file_name}: {e}')
+            #print(f'An error occurred while processing file {file_name}: {e}')
+
+    def process_directory(dir_path, processed_dirs=set(), processed_files=set()):
+        for root, dirs, files in os.walk(dir_path):
+            for file_name in files:
+                if file_name.endswith('.java'):
+                    file_path = os.path.join(root, file_name)
+                    if os.path.realpath(file_path) not in processed_files:
+                        processed_files.add(os.path.realpath(file_path))
+                        print(file_name)
+                        process_file(file_name, file_path)
+            for dir_name in dirs:
+                dir_path = os.path.join(root, dir_name)
+                if os.path.realpath(dir_path) not in processed_dirs:
+                    processed_dirs.add(os.path.realpath(dir_path))
+                    process_directory(dir_path, processed_dirs, processed_files)
+
+    process_directory(file_path)
+    columns = ['Row Range', 'File Name', 'File Path', 'Whitespace Ratio', 'Statement Words', 'Tabs', 'Underscores', 'Empty Lines',
+               'Mean Line Length', 'Mean Comment Length'] + list(bert_columns)
+    df = pd.DataFrame(data, columns=columns)
+    df.fillna(0, inplace=True)
+    df = normalize(df)
+    # Labeling
+    df['Written'] = df['File Path'].apply(lambda x: 1 if 'Anomalous' in x else 0)
+
+    ignore_cols = ['Written', 'File Path', 'Row Range', 'File Name']
+    add_optics_clusters(df, ignore_cols, len(df))
+
+    #KL Divergence
+    df = calculate_kl_divergence2(df, ignore_cols, code_group_lengths)
+
+    return df
+
+#bert embedded ast nodes
+def readFilesWithDistilBERT(file_path, groupLength, eps=1e-9):
     data = []
     bert_columns = set()
     code_group_lengths = []
