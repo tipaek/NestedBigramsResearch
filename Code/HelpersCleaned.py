@@ -11,7 +11,7 @@ import base64
 
 from scipy.stats import entropy
 
-from sklearn.cluster import KMeans, OPTICS
+from sklearn.cluster import KMeans, OPTICS, Birch
 from kneed import KneeLocator
 
 import torch
@@ -285,6 +285,18 @@ def add_optics_clusters(df, ignore_cols, size):
     clusters = optics.labels_
 
     df['Cluster'] = clusters
+
+def add_birch_clusters(df, ignore_cols):
+    X = df.drop(ignore_cols, axis=1).values
+
+    birch = Birch(threshold=0.5, n_clusters=None)
+
+    birch.fit(X)
+
+    clusters = birch.predict(X)
+
+    df['Cluster'] = clusters
+
 
 
 
