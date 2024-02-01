@@ -79,8 +79,7 @@ def readFilesWithBERT2(file_path, groupLength, eps=1e-9):
                'Mean Line Length', 'Mean Comment Length'] + list(bert_columns)
     df = pd.DataFrame(data, columns=columns)
     df.fillna(0, inplace=True)
-    df = normalize(df)
-    print('normalization finished')
+
     # Labeling
     df['Written'] = df['File Path'].apply(lambda x: 1 if 'Anomalous' in x else 0)
 
@@ -91,6 +90,10 @@ def readFilesWithBERT2(file_path, groupLength, eps=1e-9):
     #KL Divergence
     df = calculate_kl_divergence2(df, ignore_cols, code_group_lengths)
     print('kl divergence finished')
+
+    #moved this down, to at the end of divergence and clustering calculation
+    df = normalize(df)
+    print('normalization finished')
 
     return df
 
