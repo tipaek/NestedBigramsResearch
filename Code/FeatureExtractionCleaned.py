@@ -12,6 +12,36 @@ from javalang.parse import parse
 
 from transformers import BertTokenizer, BertModel, DistilBertTokenizer, DistilBertModel, AutoTokenizer, AutoModel
 
+import traceback
+
+def checkFiles(file_path):
+    def process_file(file_name, file_path):
+        try:
+            with open(file_path, 'rb') as f:
+                rawdata = f.read()
+                encoding = chardet.detect(rawdata)['encoding']
+            with open(file_path, 'r', encoding=encoding) as f:
+                code = f.read()
+                tree = parse(code)
+        except Exception as e:
+            print(f'\n\nFailed: {file_name}, {file_path}')
+            traceback.print_exc()
+    def process_directory(dir_path, processed_dirs=set(), processed_files=set()):
+        for root, dirs, files in os.walk(dir_path):
+            for file_name in files:
+                if file_name.endswith('.java'):
+                    file_path = os.path.join(root, file_name)
+                    if os.path.realpath(file_path) not in processed_files:
+                        processed_files.add(os.path.realpath(file_path))
+                        process_file(file_name, file_path)
+            for dir_name in dirs:
+                dir_path = os.path.join(root, dir_name)
+                if os.path.realpath(dir_path) not in processed_dirs:
+                    processed_dirs.add(os.path.realpath(dir_path))
+                    process_directory(dir_path, processed_dirs, processed_files)
+
+    process_directory(file_path)
+
 #ast node bert embeddings, but flattened instead of mean
 def readFilesWithBERT2(file_path, groupLength, eps=1e-9):
     data = []
@@ -124,7 +154,8 @@ def NBKL2(file_path, groupLength, eps=1e-9):
                     features = get_features(code_group)
                     # Store the length of the code group
                     code_group_lengths.append(len(code_group))
-
+                        
+                    # the way I'm making this dataset may be scuffed to begin with(like I don't think there's a new row being entered here for example...)
                     data.append([row_range, file_name, file_path] + features + [
                         bigram_freqs.get(bigram_to_str(bigram), 0) / len(code_group) for bigram in
                         nested_bigram_columns])
@@ -155,6 +186,7 @@ def NBKL2(file_path, groupLength, eps=1e-9):
     df.fillna(0, inplace=True)
 
     df = normalize(df)
+    df = df.div(df.sum(axis=1), axis=0)
     print('normalization finished')
     # Labeling
     df['Written'] = df['File Path'].apply(lambda x: 1 if 'Anomalous' in x else 0)
