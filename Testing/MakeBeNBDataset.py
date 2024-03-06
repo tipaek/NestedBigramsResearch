@@ -11,15 +11,12 @@ from Code.Helpers import normalize
 files = r'C:/Users/tipaek/OneDrive - Syracuse University/Desktop/Research/NestedBigramsResearch/Data/GPT - Rewrite'
 
 temp = [10, 20, 30, 40, 50, 60, 70]
-
-data = checkFiles(files)
-
 #getting features and giving 0/1 classes where 1 is anomalous
-#for val in temp:
-    #print(f'\n\n\n\nVAL: {val}')
-    #data = NBKL2(files, val)
+for val in temp:
+    print(f'\n\n\n\nVAL: {val}')
+    data = NBKL3(files, val)
 
-    #data.to_csv(f'GPT.NBKL2.1.{val}.csv', index=False)
+    data.to_csv(f'GPT.CNB.Base.{val}.csv', index=False)
 
 
 
