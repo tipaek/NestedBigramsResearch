@@ -29,6 +29,30 @@ from sklearn.model_selection import cross_val_score, cross_validate
 from sklearn.preprocessing import StandardScaler
 
 
+def get_bigrams_nonverbose(node, start_line, end_line):
+    result = []
+    if isinstance(node, list):
+        for child in node:
+            result.extend(get_bigrams(child, start_line, end_line))
+    elif isinstance(node, Node):
+        if node.position is not None and start_line <= node.position.line <= end_line:
+            for child in node.children:
+                if isinstance(child, list):
+                    for grandchild in child:
+                        result.extend(get_bigrams(grandchild, start_line, end_line))
+                elif isinstance(child, Node) and child.position is not None and start_line <= child.position.line <= end_line:
+                    result.append((type(node).__name__, type(child).__name__))
+                    result.extend(get_bigrams(child, start_line, end_line))
+        else:
+            for child in node.children:
+                if isinstance(child, list):
+                    for grandchild in child:
+                        result.extend(get_bigrams(grandchild, start_line, end_line))
+                elif isinstance(child, Node):
+                    result.extend(get_bigrams(child, start_line, end_line))
+    return result
+
+
 def get_bigrams(node, start_line, end_line):
     result = []
     if isinstance(node, list):
@@ -67,6 +91,8 @@ def bigram_to_str(bigram):
                 attrs.append(f'{attr}={value}')
         result.append(f'{node.__class__.__name__}({", ".join(attrs)})')
     return f'({", ".join(result)})'
+
+        
 
 # nodes in range from ast
 def get_nodes_in_range(node, start_line, end_line):

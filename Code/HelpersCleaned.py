@@ -25,6 +25,31 @@ from sklearn.metrics import make_scorer, accuracy_score, precision_score, f1_sco
 from sklearn.model_selection import cross_val_score, cross_validate
 from sklearn.preprocessing import StandardScaler
 
+def get_bigrams_nonverbose(node, start_line, end_line):
+    result = []
+    if isinstance(node, list):
+        for child in node:
+            result.extend(get_bigrams(child, start_line, end_line))
+    elif isinstance(node, Node):
+        if node.position is not None and start_line <= node.position.line <= end_line:
+            for child in node.children:
+                if isinstance(child, list):
+                    for grandchild in child:
+                        result.extend(get_bigrams(grandchild, start_line, end_line))
+                elif isinstance(child, Node) and child.position is not None and start_line <= child.position.line <= end_line:
+                    result.append((type(node).__name__, type(child).__name__))
+                    result.extend(get_bigrams(child, start_line, end_line))
+        else:
+            for child in node.children:
+                if isinstance(child, list):
+                    for grandchild in child:
+                        result.extend(get_bigrams(grandchild, start_line, end_line))
+                elif isinstance(child, Node):
+                    result.extend(get_bigrams(child, start_line, end_line))
+    return result
+
+ 
+
 def get_bigrams(node, start_line, end_line):
     result = []
     if isinstance(node, list):
@@ -108,9 +133,40 @@ def encode_nodes_with_BERT(nodes, tokenizer, model, batch_size=100):
         inputs = torch.cat(padded_inputs).to(device)
         with torch.no_grad():
             outputs = model(inputs)
+            
+            #cls token, rep's entire sequence
             embs = outputs.last_hidden_state[:, 0, :].cpu().numpy()
+            
+            #average across tokens, overlapping all of the 768 dim vectors
+            #embs = outputs.last_hidden_state.mean(dim=1).cpu().numpy()
         result.extend(list(zip(batch, embs)))
     return result
+
+def encode_with_BERT(input_tokens, tokenizer, model):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        print('cuda detected')
+    else:
+        print('cuda not detected!')
+    model.to(device)
+    
+    input_string = tokenizer.convert_tokens_to_string(input_tokens)
+    #print(input_string)
+    
+    input_ids = tokenizer.encode(input_string, add_special_tokens=True, max_length=512)
+    if(len(input_ids) > 512):
+        print("FAIL\n")
+    
+    input_ids = torch.tensor([input_ids])
+    
+    
+    with torch.no_grad():
+        outputs = model(input_ids)
+        embs = outputs.last_hidden_state[:, 0, :].cpu().numpy()
+    
+    return(input_string, embs)
+    
+    
 
 # returns a list of features to add to the dataframe
 def get_features(code_group):
@@ -296,6 +352,8 @@ def add_birch_clusters(df, ignore_cols):
     clusters = birch.predict(X)
 
     df['Cluster'] = clusters
+    
+
 
 
 
