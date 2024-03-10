@@ -227,7 +227,7 @@ def NBKL3(file_path, groupLength, eps=1e-9):
                 index_numRows[1] += 1
                 start_line = i * groupLength
                 end_line = (i + 1) * groupLength - 1
-                #bigrams = get_bigrams(tree, start_line, end_line)
+                #bigrams2 = get_bigrams(tree, start_line, end_line)
                #bigrams = get_nodes_in_range(tree, start_line, end_line)
                 bigrams = get_bigrams_nonverbose(tree, start_line, end_line)
                 for bigram in bigrams:
