@@ -1,7 +1,7 @@
 #experiment logging
 from comet_ml import Experiment
 from comet_ml.integration.sklearn import log_model
-from config.py import API_KEY
+from config import API_KEY
 
 #data
 import pandas as pd
@@ -37,19 +37,26 @@ columns = ['Group Size',
            'LGBM AUC', 'LGBM F-1 Score', 'LGBM Accuracy', 'LGBM Precision',
            'XGB AUC', 'XGB F-1 Score', 'XGB Accuracy', 'XGB Precision',
            'CatBoost AUC', 'CatBoost F-1 Score', 'CatBoost Accuracy', 'CatBoost Precision',
-           'RF AUC', 'RF F-1 Score', 'RF Accuracy', 'RF Precision',
-           'RBF SVM AUC', 'RBF SVM F-1 Score', 'RBF SVM Accuracy', 'RBF SVM Precision',
-           'Sigmoid SVM AUC', 'Sigmoid SVM F-1 Score', 'Sigmoid SVM Accuracy', 'Sigmoid SVM Precision']
+           'RF AUC', 'RF F-1 Score', 'RF Accuracy', 'RF Precision']
 
 
-group_sizes = [10, 20, 30, 40, 50, 60, 70]
-paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\NB-Base\GPT.NB-base"]
+#group_sizes = [10, 20, 30, 40, 50, 60, 70]
+#group_sizes = [2000, 1000, 900, 800, 700, 600, 500, 400, 300, 200, 100]
+group_sizes = [5000, 4500, 4000, 3500, 3000, 2500]
+paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\CNB + NB\EqualWidthBinning\60\GPT.CNB+NB.EqualWidthBinning"]
 
 testing_data = []
 
+experiment = Experiment(
+  api_key=API_KEY,
+  project_name="anomaly-detection-research",
+  workspace="tipaek",
+)
+experiment.add_tags(["GPT - Rewrite, CNB+NB-EqualWidthBinning", "GPT - Rewrite", "CNB + NB", "ensembles", "group size: 60", "up to 5k"])
+
 for path in paths:
     for size in group_sizes:
-        curr_path = f'{path}.{size}.csv'
+        curr_path = f'{path}.{size}.G60.csv'
         print(f'\nPATH: {curr_path}')
         
         data = pd.read_csv(curr_path)
@@ -68,23 +75,13 @@ for path in paths:
         xgb_clf = XGBClassifier(random_state=42)
         catboost_clf = CatBoostClassifier(random_state=42, verbose=False)
         rf_clf = RandomForestClassifier(random_state=42)
-        rbf_svm = svm.SVC(kernel='rbf', random_state=42, probability=True) 
-        sigmoid_svm = svm.SVC(kernel='sigmoid', random_state=42, probability=True)
         
 
         testing_data.append(size)
 
-        for clf in (lgbm_clf, xgb_clf, catboost_clf, rf_clf, rbf_svm, sigmoid_svm):
+        for clf in (lgbm_clf, xgb_clf, catboost_clf, rf_clf):
             clf_name = type(clf).__name__
-            
-            experiment = Experiment(
-              api_key=API_KEY,
-              project_name="anomaly-detection-research",
-              workspace="tipaek",
-            )
-            
-            experiment.add_tags([clf_name, f"GPT - Rewrite, NB-Base.1, Size: {size}, {clf_name}", size, "GPT - Rewrite", "NB-Base.1"])
-            
+         
             clf.fit(X_train, y_train)
 
             y_pred = clf.predict(X_test)
@@ -98,21 +95,25 @@ for path in paths:
             cm = confusion_matrix(y_test, y_pred)
 
             testing_data.append([roc_auc, f1, accuracy, precision])
-            
+     
             experiment.log_metrics({
+                "group_size": size,
+                "dimensions": X.shape[1],
                 "roc_auc": roc_auc,
                 "f1": f1,
                 "accuracy": accuracy,
-                "precision": precision
+                "precision": precision,
+                "width": size,
+                "clf": clf_name
                 })
             experiment.log_confusion_matrix(labels=["Not Anomalous", "Anomalous"], matrix=cm)
             
-            experiment.end()
             
             
+experiment.end()
 
-df = pd.DataFrame(testing_data, columns=columns)
-df.to_csv(f'NB-Base.1.csv', index=False)
+#df = pd.DataFrame(testing_data, columns=columns)
+#df.to_csv('NB+N.EqualWidthBinning.60.csv', index=False)
 
 
 

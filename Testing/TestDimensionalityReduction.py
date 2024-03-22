@@ -1,7 +1,7 @@
 # experiment logging
 from comet_ml import Experiment
 from comet_ml.integration.sklearn import log_model
-from config.py import API_KEY
+from config import API_KEY
 
 #data
 import pandas as pd
@@ -49,7 +49,7 @@ experiment = Experiment(
   project_name="anomaly-detection-research",
   workspace="tipaek",
 )
-experiment.add_tags(["GPT - Rewrite, CNB-Base", "GPT - Rewrite", "CNB-Base.1", "Autoencoder single dense", "rf", "Random Forest"])
+experiment.add_tags(["GPT - Rewrite, CNB-Base", "GPT - Rewrite", "CNB", "Autoencoder single dense", "rf", "Epochs: 60", "Multiples: 10"])
 
 for path in paths:
     testing_data=[]
@@ -119,23 +119,24 @@ for path in paths:
         testing_data.append([reduced_input.shape[1], roc_auc, f1, accuracy, precision])
         
         experiment.log_metrics({
-            "group_size": path,
-            "dimensions": encoding_dim,
-            "percentage": size,
-            "epochs": 60,
-            "roc_auc": roc_auc,
-            "f1": f1,
-            "accuracy": accuracy,
-            "precision": precision
+            f"{path}.group_size": path,
+            f"{path}.dimensions": encoding_dim,
+            f"{path}.percentage": size,
+            f"{path}.epochs": 60,
+            f"{path}.roc_auc": roc_auc,
+            f"{path}.f1": f1,
+            f"{path}.accuracy": accuracy,
+            f"{path}.precision": precision
             })
         
         # clear up memory
-        del autoencoder, encoder, X_temp, X_temp_test, rf, input_X, inputTest
+        del autoencoder, encoder, X_temp, X_temp_test, rf, input_X, inputTest, reduced_input, reduced_input_test, encoded, decoded, y_pred, y_pred_proba
         gc.collect()
         
         K.clear_session()
     
-    del X, X_train, X_test, y_train, y_test
+    del X, X_train, X_test, y_train, y_test, y
+    gc.collect()
 
     df = pd.DataFrame(testing_data, columns=columns)
     df.to_csv(f'GPT.CNB.AutoEncoder_Dim.{path}.csv', index=False)
