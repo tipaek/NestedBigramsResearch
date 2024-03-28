@@ -231,7 +231,8 @@ def extract_features_with_equalWidthBinning(file_path, groupLength, bin_size, ep
                 end_line = (i + 1) * groupLength - 1
                 
                 if dictionary_type[0] == 0:
-                    features = get_bigrams_nonverbose(tree, start_line, end_line)
+                    #features = get_bigrams_nonverbose(tree, start_line, end_line)
+                    features = []
                 # for some reason this second if doesn't work, which makes process_file out of bounds immediately --_
                 if dictionary_type[0] == 1:
                     #features = get_nodes_in_range(tree, start_line, end_line)
@@ -261,8 +262,8 @@ def extract_features_with_equalWidthBinning(file_path, groupLength, bin_size, ep
                     end_line = (i + 1) * groupLength - 1
                     row_range = f'{start_line}-{end_line}'
                     #features = get_bigrams_nonverbose(tree, start_line, end_line) + get_nodes_in_range(tree, start_line, end_line)
-                    features = get_bigrams_nonverbose(tree, start_line, end_line) + get_bigrams(tree, start_line, end_line)
-                    
+                    #features = get_bigrams_nonverbose(tree, start_line, end_line) + get_bigrams(tree, start_line, end_line)
+                    features = get_bigrams(tree, start_line, end_line)
                     feature_freqs = bigram_freq(features)
                     if len(code_string) != 0:
                         initial_features = get_features(code_string)
@@ -536,6 +537,7 @@ def NBKL3(file_path, groupLength, eps=1e-9):
 
     return df
 
+# deleted lineIterator of the 40 uathors dataset bc contains decompiled code
 def checkFiles(file_path):
     def process_file(file_name, file_path):
         try:

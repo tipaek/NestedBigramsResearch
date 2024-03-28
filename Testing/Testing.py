@@ -40,10 +40,11 @@ columns = ['Group Size',
            'RF AUC', 'RF F-1 Score', 'RF Accuracy', 'RF Precision']
 
 
-#group_sizes = [10, 20, 30, 40, 50, 60, 70]
+group_sizes = [10, 20, 30, 40, 50, 60, 70]
 #group_sizes = [2000, 1000, 900, 800, 700, 600, 500, 400, 300, 200, 100]
-group_sizes = [5000, 4500, 4000, 3500, 3000, 2500]
-paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\CNB + NB\EqualWidthBinning\60\GPT.CNB+NB.EqualWidthBinning"]
+#group_sizes = [5000, 4500, 4000, 3500, 3000, 2500]
+#paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\NB\Base\GPT.NB.Base"]
+paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\40Authors\NB\40.NB.Base"]
 
 testing_data = []
 
@@ -52,11 +53,12 @@ experiment = Experiment(
   project_name="anomaly-detection-research",
   workspace="tipaek",
 )
-experiment.add_tags(["GPT - Rewrite, CNB+NB-EqualWidthBinning", "GPT - Rewrite", "CNB + NB", "ensembles", "group size: 60", "up to 5k"])
+#experiment.add_tags(["GPT - Rewrite, NB.Base", "GPT - Rewrite", "NB", "ensembles"])
+experiment.add_tags(["40 Authors, NB.Base", "40 Authors", "ensembles"])
 
 for path in paths:
     for size in group_sizes:
-        curr_path = f'{path}.{size}.G60.csv'
+        curr_path = f'{path}.G{size}.csv'
         print(f'\nPATH: {curr_path}')
         
         data = pd.read_csv(curr_path)
@@ -101,9 +103,9 @@ for path in paths:
                 "dimensions": X.shape[1],
                 "roc_auc": roc_auc,
                 "f1": f1,
-                "accuracy": accuracy,
+                "40.accuracy": accuracy,
                 "precision": precision,
-                "width": size,
+                #"width": 3000,
                 "clf": clf_name
                 })
             experiment.log_confusion_matrix(labels=["Not Anomalous", "Anomalous"], matrix=cm)
