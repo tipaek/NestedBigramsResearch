@@ -54,7 +54,7 @@ experiment = Experiment(
   workspace="tipaek",
 )
 #experiment.add_tags(["GPT - Rewrite, NB.Base", "GPT - Rewrite", "NB", "ensembles"])
-experiment.add_tags(["40 Authors, NB.Base", "40 Authors", "ensembles"])
+experiment.add_tags(["40 Authors, NB.Base", "40 Authors", "ensembles", "NB"])
 
 for path in paths:
     for size in group_sizes:
@@ -101,11 +101,11 @@ for path in paths:
             experiment.log_metrics({
                 "group_size": size,
                 "dimensions": X.shape[1],
-                "roc_auc": roc_auc,
-                "f1": f1,
+                "40.roc_auc": roc_auc,
+                "40.f1": f1,
                 "40.accuracy": accuracy,
-                "precision": precision,
-                #"width": 3000,
+                "40.precision": precision,
+                "width": 3000,
                 "clf": clf_name
                 })
             experiment.log_confusion_matrix(labels=["Not Anomalous", "Anomalous"], matrix=cm)
