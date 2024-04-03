@@ -231,12 +231,13 @@ def extract_features_with_equalWidthBinning(file_path, groupLength, bin_size, ep
                 end_line = (i + 1) * groupLength - 1
                 
                 if dictionary_type[0] == 0:
-                    #features = get_bigrams_nonverbose(tree, start_line, end_line)
-                    features = []
+                    features = get_bigrams_nonverbose(tree, start_line, end_line)
+                    #features = []
                 # for some reason this second if doesn't work, which makes process_file out of bounds immediately --_
                 if dictionary_type[0] == 1:
                     #features = get_nodes_in_range(tree, start_line, end_line)
-                    features = get_bigrams(tree, start_line, end_line)
+                    #features = get_bigrams(tree, start_line, end_line)
+                    features = []
                 
                 for feature in features:
                     str_feature = str(feature)
@@ -263,7 +264,8 @@ def extract_features_with_equalWidthBinning(file_path, groupLength, bin_size, ep
                     row_range = f'{start_line}-{end_line}'
                     #features = get_bigrams_nonverbose(tree, start_line, end_line) + get_nodes_in_range(tree, start_line, end_line)
                     #features = get_bigrams_nonverbose(tree, start_line, end_line) + get_bigrams(tree, start_line, end_line)
-                    features = get_bigrams(tree, start_line, end_line)
+                    #features = get_bigrams(tree, start_line, end_line)
+                    features = get_bigrams_nonverbose(tree, start_line, end_line)
                     feature_freqs = bigram_freq(features)
                     if len(code_string) != 0:
                         initial_features = get_features(code_string)

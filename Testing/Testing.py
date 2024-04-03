@@ -41,10 +41,9 @@ columns = ['Group Size',
 
 
 group_sizes = [10, 20, 30, 40, 50, 60, 70]
-#group_sizes = [2000, 1000, 900, 800, 700, 600, 500, 400, 300, 200, 100]
-#group_sizes = [5000, 4500, 4000, 3500, 3000, 2500]
+#group_sizes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
 #paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\NB\Base\GPT.NB.Base"]
-paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\40Authors\NB\40.NB.Base"]
+paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\40Authors\CNB\40.CNB"]
 
 testing_data = []
 
@@ -54,7 +53,7 @@ experiment = Experiment(
   workspace="tipaek",
 )
 #experiment.add_tags(["GPT - Rewrite, NB.Base", "GPT - Rewrite", "NB", "ensembles"])
-experiment.add_tags(["40 Authors, NB.Base", "40 Authors", "ensembles", "NB"])
+experiment.add_tags(["40 Authors, CNB", "40 Authors", "ensembles", "CNB"])
 
 for path in paths:
     for size in group_sizes:
@@ -105,7 +104,7 @@ for path in paths:
                 "40.f1": f1,
                 "40.accuracy": accuracy,
                 "40.precision": precision,
-                "width": 3000,
+                #"width": 600,
                 "clf": clf_name
                 })
             experiment.log_confusion_matrix(labels=["Not Anomalous", "Anomalous"], matrix=cm)
