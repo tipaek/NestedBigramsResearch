@@ -21,8 +21,9 @@ from sklearn.metrics import roc_auc_score, f1_score, precision_score, confusion_
 
 import itertools
 import sys
-sys.path.insert(0, 'C:\\Users\\tipaek\\OneDrive - Syracuse University\\Desktop\\Research\\NestedBigramsResearch')
+#sys.path.insert(0, 'C:\\Users\\tipaek\\OneDrive - Syracuse University\\Desktop\\Research\\NestedBigramsResearch')
 #sys.path.insert(0, 'C:\\Coding\\Research\\Summer 2023\\Stylometry Neural Networks\\Code')
+sys.path.insert(0, 'C:\\Users\\l-tipaek\Desktop\\Research\\NestedBigramsResearch')
 
 from Code.Helpers import hash_column, add_clustering
 
@@ -42,9 +43,11 @@ columns = ['Group Size',
 
 group_sizes = [10, 20, 30, 40, 50, 60, 70]
 #group_sizes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
-#paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\NB\Base\GPT.NB.Base"]
-paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\40Authors\CNB\40.CNB"]
 
+#paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\NB\Base\GPT.NB.Base"]
+#paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\40Authors\CNB\40.CNB"]
+#paths = [r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\CNB\EqualWidthBinning\AverageCLS\40\GPT.EqualWidthBinning(average)"]
+paths = [r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\40Authors\EqualWidthBinning\NB Average + Freq\Optimized\40.NB.EqualWidthBinning(average+freq)"]
 testing_data = []
 
 experiment = Experiment(
@@ -52,12 +55,12 @@ experiment = Experiment(
   project_name="anomaly-detection-research",
   workspace="tipaek",
 )
-#experiment.add_tags(["GPT - Rewrite, NB.Base", "GPT - Rewrite", "NB", "ensembles"])
-experiment.add_tags(["40 Authors, CNB", "40 Authors", "ensembles", "CNB"])
+#experiment.add_tags(["GPT - Rewrite, NB Mean Squared Average + Freq", "GPT - Rewrite", "NB Average Cls + Freq", "ensembles", "Equal Width Binning"])
+experiment.add_tags(["40 Authors, NB Average+freq", "40 Authors", "ensembles", "NB Average+freq"])
 
 for path in paths:
     for size in group_sizes:
-        curr_path = f'{path}.G{size}.csv'
+        curr_path = f'{path}.600.2000.G{size}.csv'
         print(f'\nPATH: {curr_path}')
         
         data = pd.read_csv(curr_path)
@@ -100,11 +103,11 @@ for path in paths:
             experiment.log_metrics({
                 "group_size": size,
                 "dimensions": X.shape[1],
-                "40.roc_auc": roc_auc,
+                "40.roc_auc": roc_auc, #metrics
                 "40.f1": f1,
                 "40.accuracy": accuracy,
                 "40.precision": precision,
-                #"width": 600,
+                "width": "600 + 2000",
                 "clf": clf_name
                 })
             experiment.log_confusion_matrix(labels=["Not Anomalous", "Anomalous"], matrix=cm)

@@ -7,8 +7,8 @@ import chardet
 from pathlib import Path
 
 import sys
-sys.path.insert(0, 'C:\\Users\\tipaek\\OneDrive - Syracuse University\\Desktop\\Research\\NestedBigramsResearch')
-
+#sys.path.insert(0, 'C:\\Users\\tipaek\\OneDrive - Syracuse University\\Desktop\\Research\\NestedBigramsResearch')
+sys.path.insert(0, 'C:\\Users\\l-tipaek\Desktop\\Research\\NestedBigramsResearch')
 # for bigrams and divergence
 from kmedoids import KMedoids
 
@@ -242,8 +242,9 @@ def CodeBERTSlideCLSAll(file_path, groupLength, eps=1e-9):
                         str_token_group = tokenizer.convert_tokens_to_string(token_group)
                         if node_dict.get(str_token_group+'0') == None:
                             for value in range(768):
-                                node_dict[str_token_group+value] = index_numRows[0]
+                                node_dict[str_token_group+str(value)] = index_numRows[0]
                                 index_numRows[0] += 1
+                                #print(index_numRows[0])
                            
       
                 code_group_lengths.append(len(code_group))

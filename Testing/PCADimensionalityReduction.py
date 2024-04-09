@@ -30,7 +30,8 @@ from sklearn.metrics import roc_auc_score, f1_score, precision_score
 import itertools
 import sys
 #sys.path.insert(0, 'C:\\Coding\\Research\\Summer 2023\\Stylometry Neural Networks\\Code')
-sys.path.insert(0, 'C:\\Users\\tipaek\OneDrive - Syracuse University\Desktop\\Research\\NestedBigramsResearch')
+#sys.path.insert(0, 'C:\\Users\\tipaek\OneDrive - Syracuse University\Desktop\\Research\\NestedBigramsResearch')
+sys.path.insert(0, 'C:\\Users\\l-tipaek\Desktop\\Research\\NestedBigramsResearch')
 import gc
 
 from Code.Helpers import hash_column, add_clustering

@@ -19,6 +19,8 @@ import copy
 from pyclustering.cluster import xmeans
 from pyclustering.cluster.center_initializer import kmeans_plusplus_initializer
 
+import math
+
 
 # generates bigrams from start_line <= node.position.line <= end_line given ast node(in this case, it's the entirety of the tree)
 from sklearn.metrics import make_scorer, accuracy_score, precision_score, f1_score
@@ -75,8 +77,60 @@ def get_bigrams(node, start_line, end_line):
     return result
 
 # returns dictionary of the bigrams(bigram, frequency)
-def bigram_freq(bigrams):
+def bigram_freq(bigrams, freq_type):
+    output = Counter(bigrams)
+    
+    if freq_type == None:
+        return output
+    if freq_type == 1:
+        return {str(key) + "standard": value for key, value in output.items()}
+    
     return Counter(bigrams)
+
+def feature_cls(features, tokenizer, model, feature_dict, cls_type):
+    # Initialize an empty dictionary to store the sum of cls token values and their counts
+    sum_dict = {}
+    count_dict = {}
+    all_dict = {}
+
+    for node in features:
+        str_node = str(node)
+        tokens = tokenizer.tokenize(str_node)
+        num_groups = math.ceil(len(tokens) / 512)
+        
+        token_groups = [tokens[z * 512: (z+1) * 512] for z in range(num_groups)]
+        
+        for token_group in token_groups:
+    
+            key, val = encode_with_BERT(token_group, tokenizer, model)
+            val = val.flatten()
+            
+            
+            if cls_type == 'all':
+                val = np.abs(val)**2
+                
+                for index in range(768):
+                    all_dict[key+str(index)] = val[index]
+                
+            elif cls_type == 'absolute':
+                val = np.abs(val)
+                # If the feature is already in the dictionary, add the current cls token value to the sum and increment the count
+                if key in sum_dict:
+                    sum_dict[key] += sum(val)
+                    count_dict[key] += len(val)
+                # If the feature is not in the dictionary, initialize the sum and count with the current cls token value
+                else:
+                    sum_dict[key] = sum(val)
+                    count_dict[key] = len(val)
+    
+    if cls_type == 'all':
+        return all_dict
+    
+    # Calculate the average cls token value for each feature
+    avg_dict = {feature: sum_dict[feature] / count_dict[feature] for feature in sum_dict}  
+
+    return avg_dict
+     
 
 # converts bigrams to strings for feature labels in dataframe (doesn't include empty lists)
 def bigram_to_str(bigram):
@@ -144,10 +198,10 @@ def encode_nodes_with_BERT(nodes, tokenizer, model, batch_size=100):
 
 def encode_with_BERT(input_tokens, tokenizer, model):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    if torch.cuda.is_available():
-        print('cuda detected')
-    else:
-        print('cuda not detected!')
+    # if torch.cuda.is_available():
+    #     print('cuda detected')
+    # else:
+    #     print('cuda not detected!')
     model.to(device)
     
     input_string = tokenizer.convert_tokens_to_string(input_tokens)
@@ -157,7 +211,8 @@ def encode_with_BERT(input_tokens, tokenizer, model):
     if(len(input_ids) > 512):
         print("FAIL\n")
     
-    input_ids = torch.tensor([input_ids])
+    input_ids = torch.tensor([input_ids]).to(device)
+
     
     
     with torch.no_grad():
