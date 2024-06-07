@@ -46,7 +46,8 @@ columns = ['Group Size',
            'RF AUC', 'RF F-1 Score', 'RF Accuracy', 'RF Precision']
 
 
-group_sizes = [10, 20, 30, 40, 50, 60, 70, 100, 200]
+#group_sizes = [10, 20, 30, 40, 50, 60, 70]
+group_sizes = [i for i in range(1, 300)]
 
 #group_sizes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
 
@@ -73,6 +74,7 @@ for path in paths:
     for size in group_sizes:
         #curr_path = f'{path}.600.2000.G{size}.csv'
         print(f'\nPATH: {curr_path}')
+        print(size)
         
         data = pd.read_csv(curr_path)
         print(f'`t {data.shape[0]}\n\t {data.shape[1]}')
@@ -169,22 +171,27 @@ for metric, values in metrics.items():
     t_stat, p_val = stats.ttest_1samp(values, 0.5)  # Null hypothesis: mean = 0.5
     print(f"{metric} t-statistic: {t_stat}, p-value: {p_val}")
 
-    # Calculate mean and standard deviation
     mean_val = np.mean(values)
     std_dev = np.std(values)
-    print(f"{metric} mean: {mean_val}, standard deviation: {std_dev}")
-
-    # Plotting
+    
+    # plotting
     plt.figure(figsize=(10, 5))
     plt.hist(values, bins=20, color='skyblue', edgecolor='black')
     plt.title(f"Histogram of {metric}")
     plt.xlabel(metric)
     plt.ylabel("Frequency")
+    
+    # mean
     plt.axvline(x=mean_val, color='r', linestyle='dashed', linewidth=2, label=f"Mean: {mean_val:.2f}")
+    
+    # std
+    plt.axvline(x=mean_val - std_dev, color='g', linestyle='dashed', linewidth=2, label=f"Mean - 1 SD: {mean_val - std_dev:.2f}")
+    plt.axvline(x=mean_val + std_dev, color='b', linestyle='dashed', linewidth=2, label=f"Mean + 1 SD: {mean_val + std_dev:.2f}")
+    
     plt.legend()
     plt.grid(True)
 
-    # Save the plot as an image file
+
     plt.savefig(f"GPTR.EWD.F+M(G30){metric}_histogram.png")
 
 

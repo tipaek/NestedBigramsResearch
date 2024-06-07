@@ -1,0 +1,11 @@
+Dataset 1,Dataset 2,Combined P-Value
+\NB\Base\GPT.NB.G30.csv,\CNB\GPT.CNB.Base.30.csv,8.784109461742642e-280
+\NB\Base\GPT.NB.G30.csv,\NB\EWDBase\GPT.EWD.NB.G30.csv,0.0
+\NB\Base\GPT.NB.G30.csv,\NB\Transformer\AverageEqualWidth\800\GPT.NB.EqualWidthBinning(average).800.G30.csv,0.0
+\NB\Base\GPT.NB.G30.csv,\NB\Base+Transformer\Freq + Average\GPT.NB.EqualWidthBinning(freq+average).3000.4500.G30.csv,0.0
+\CNB\GPT.CNB.Base.30.csv,\NB\EWDBase\GPT.EWD.NB.G30.csv,0.0
+\CNB\GPT.CNB.Base.30.csv,\NB\Transformer\AverageEqualWidth\800\GPT.NB.EqualWidthBinning(average).800.G30.csv,0.0
+\CNB\GPT.CNB.Base.30.csv,\NB\Base+Transformer\Freq + Average\GPT.NB.EqualWidthBinning(freq+average).3000.4500.G30.csv,0.0
+\NB\EWDBase\GPT.EWD.NB.G30.csv,\NB\Transformer\AverageEqualWidth\800\GPT.NB.EqualWidthBinning(average).800.G30.csv,0.00012305241835064898
+\NB\EWDBase\GPT.EWD.NB.G30.csv,\NB\Base+Transformer\Freq + Average\GPT.NB.EqualWidthBinning(freq+average).3000.4500.G30.csv,2.083659190619801e-251
+\NB\Transformer\AverageEqualWidth\800\GPT.NB.EqualWidthBinning(average).800.G30.csv,\NB\Base+Transformer\Freq + Average\GPT.NB.EqualWidthBinning(freq+average).3000.4500.G30.csv,9.233771065104015e-234
