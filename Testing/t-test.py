@@ -32,7 +32,7 @@ datasets = [r"\NB\Base\GPT.NB.G30.csv", r"\CNB\GPT.CNB.Base.30.csv", r"\NB\EWDBa
             r"\NB\Transformer\AverageEqualWidth\800\GPT.NB.EqualWidthBinning(average).800.G30.csv", 
             r"\NB\Base+Transformer\Freq + Average\GPT.NB.EqualWidthBinning(freq+average).3000.4500.G30.csv"]
 
-random_states = [i for i in range(20)]
+random_states = [i for i in range(100)]
 
 def accuracy_scores(path, states):
     data = pd.read_csv(r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite" + path)
@@ -79,6 +79,7 @@ for dataset in datasets:
 
 def paired_t_tests(all_scores):
     p_values = []
+    statistics = []
     num_datasets = len(all_scores)
     for i, j in combinations(range(num_datasets), 2):
         p_values_pair = []
@@ -87,17 +88,48 @@ def paired_t_tests(all_scores):
             p_values_pair.append(p_val)
         combined_p_value = combine_pvalues(p_values_pair)[1]
         p_values.append((i, j, combined_p_value))
-    return p_values
+        
+        # Compute statistics
+        stats_i = {
+            'mean': np.mean(all_scores[i]),
+            'median': np.median(all_scores[i]),
+            'std_dev': np.std(all_scores[i]),
+            '10th_percentile': np.percentile(all_scores[i], 10),
+            '90th_percentile': np.percentile(all_scores[i], 90)
+        }
+        stats_j = {
+            'mean': np.mean(all_scores[j]),
+            'median': np.median(all_scores[j]),
+            'std_dev': np.std(all_scores[j]),
+            '10th_percentile': np.percentile(all_scores[j], 10),
+            '90th_percentile': np.percentile(all_scores[j], 90)
+        }
+        statistics.append((i, j, stats_i, stats_j))
+        
+    return p_values, statistics
 
-p_values = paired_t_tests(all_scores)
+p_values, statistics = paired_t_tests(all_scores)
 
 for i, j, p_val in p_values:
     print(f"Dataset {i+1} vs Dataset {j+1}: combined p-value = {p_val:.5f}")
 
 results = []
-for i, j, p_val in p_values:
-    results.append({'Dataset 1': datasets[i], 'Dataset 2': datasets[j], 'Combined P-Value': p_val})
-
+for (i, j, p_val), (_, _, stats_i, stats_j) in zip(p_values, statistics):
+    results.append({
+        'Dataset 1': datasets[i], 
+        'Dataset 2': datasets[j], 
+        'Combined P-Value': p_val,
+        'Dataset 1 Mean': stats_i['mean'],
+        'Dataset 1 Median': stats_i['median'],
+        'Dataset 1 Std Dev': stats_i['std_dev'],
+        'Dataset 1 10th Percentile': stats_i['10th_percentile'],
+        'Dataset 1 90th Percentile': stats_i['90th_percentile'],
+        'Dataset 2 Mean': stats_j['mean'],
+        'Dataset 2 Median': stats_j['median'],
+        'Dataset 2 Std Dev': stats_j['std_dev'],
+        'Dataset 2 10th Percentile': stats_j['10th_percentile'],
+        'Dataset 2 90th Percentile': stats_j['90th_percentile']
+    })
 # Step 5: Convert the results to a DataFrame
 results_df = pd.DataFrame(results)
 
