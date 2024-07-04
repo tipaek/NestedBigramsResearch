@@ -1,0 +1,1 @@
+It appears that the code snippet you provided is not displaying correctly and consists of unreadable characters. To help you effectively, I need a valid Java code snippet. Could you please provide the actual Java code you want to be rewritten?

@@ -47,32 +47,30 @@ columns = ['Group Size',
 
 
 #group_sizes = [10, 20, 30, 40, 50, 60, 70]
-group_sizes = [i for i in range(1, 300)]
 
 #group_sizes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
-
+group_sizes = [500, 1000, 2000, 3000, 4000, 5000]
 #paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\NB\Base\GPT.NB.Base"]
 #paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\40Authors\CNB\40.CNB"]
 #paths = [r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\CNB\EqualWidthBinning\AverageCLS\40\GPT.EqualWidthBinning(average)"]
 #paths = [r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\40Authors\EqualWidthBinning\NB Average + Freq\Optimized\40.NB.EqualWidthBinning(average+freq)"]
+paths = [r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\GPT - GCJ\EWD-NB-F\width test"]
 testing_data = []
-paths = [r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\CNB + NB\EqualWidthBinning\(3000)\GPT.CNB+NB.EqualWidthBinning.3000.G30.csv"]
+#paths = [r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\CNB + NB\EqualWidthBinning\(3000)\GPT.CNB+NB.EqualWidthBinning.3000.G30.csv"]
 
-# experiment = Experiment(
-#   api_key=API_KEY,
-#   project_name="anomaly-detection-research",
-#   workspace="tipaek",
-# )
+experiment = Experiment(
+  api_key=API_KEY,
+  project_name="anomaly-detection-research",
+  workspace="tipaek",
+)
 # experiment.add_tags(["GPT - Rewrite, NB Mean Squared Average + Freq", "GPT - Rewrite", "NB Average Cls + Freq", "ensembles", "Equal Width Binning", "Test Seeds"])
-#experiment.add_tags(["40 Authors, NB Average+freq", "40 Authors", "ensembles", "NB Average+freq"])
-accuracies = []
-f1s = []
-aucs = []
-precisions = []
+# experiment.add_tags(["40 Authors, NB Average+freq", "40 Authors", "ensembles", "NB Average+freq"])
+experiment.add_tags(["GPT GCJ", "EWD NB Width"])
+
 for path in paths:
-    curr_path = f'{path}'
     for size in group_sizes:
         #curr_path = f'{path}.600.2000.G{size}.csv'
+        curr_path = f"{path}\GCJ-GPT.EWD.NB.G30.{size}.csv"
         print(f'\nPATH: {curr_path}')
         print(size)
         
@@ -85,21 +83,21 @@ for path in paths:
 
         X = X.rename(columns=hash_column)
 
-        # X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
 
         
-        # lgbm_clf =LGBMClassifier(random_state=42, verbose=-1)
-        # xgb_clf = XGBClassifier(random_state=42)
-        # catboost_clf = CatBoostClassifier(random_state=42, verbose=False)
-        # rf_clf = RandomForestClassifier(random_state=42)
+        lgbm_clf =LGBMClassifier(random_state=42, verbose=-1)
+        xgb_clf = XGBClassifier(random_state=42)
+        catboost_clf = CatBoostClassifier(random_state=42, verbose=False)
+        rf_clf = RandomForestClassifier(random_state=42)
         
-        X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=size)
+        # X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=size)
 
         
-        lgbm_clf =LGBMClassifier(random_state=size, verbose=-1)
-        xgb_clf = XGBClassifier(random_state=size)
-        catboost_clf = CatBoostClassifier(random_state=size, verbose=False)
-        rf_clf = RandomForestClassifier(random_state=size)
+        # lgbm_clf =LGBMClassifier(random_state=size, verbose=-1)
+        # xgb_clf = XGBClassifier(random_state=size)
+        # catboost_clf = CatBoostClassifier(random_state=size, verbose=False)
+        # rf_clf = RandomForestClassifier(random_state=size)
         
 
         testing_data.append(size)
@@ -127,72 +125,34 @@ for path in paths:
             f1t += f1 / 4
             aucc += roc_auc / 4
             
-            # cm = confusion_matrix(y_test, y_pred)
+            cm = confusion_matrix(y_test, y_pred)
         
-        accuracies.append(acc)
-        precisions.append(prec)
-        f1s.append(f1t)
-        aucs.append(aucc)
-            
+    
         
 
-            # testing_data.append([roc_auc, f1, accuracy, precision])
+            testing_data.append([roc_auc, f1, accuracy, precision])
      
-#             experiment.log_metrics({
-#                 "group_size": 30,
-#                 "dimensions": X.shape[1],
-#                 "roc_auc": roc_auc, #metrics
-#                 "f1": f1,
-#                 "accuracy": accuracy,
-#                 "precision": precision,
-#                 "width": "600 + 2000",
-#                 "clf": clf_name,
-#                 "random_seed": size
-#                 })
-#             experiment.log_confusion_matrix(labels=["Not Anomalous", "Anomalous"], matrix=cm)
+            experiment.log_metrics({
+                "group_size": 30,
+                "dimensions": X.shape[1],
+                "gcj.roc_auc": roc_auc, #metrics
+                "gcj.f1": f1,
+                "gcj.accuracy": accuracy,
+                "gcj.precision": precision,
+                "width": size,
+                "clf": clf_name,
+                "random_seed": 42
+                })
+            experiment.log_confusion_matrix(labels=["Not Anomalous", "Anomalous"], matrix=cm)
             
             
             
-# experiment.end()
+experiment.end()
 
 #df = pd.DataFrame(testing_data, columns=columns)
 #df.to_csv('NB+N.EqualWidthBinning.60.csv', index=False)
 
-# t-test
-metrics = {
-    'accuracy': accuracies,
-    'precision': precisions,
-    'auc': aucs,
-    'f1_score': f1s
-}
 
-for metric, values in metrics.items():
-    # Calculate t-test
-    t_stat, p_val = stats.ttest_1samp(values, 0.5)  # Null hypothesis: mean = 0.5
-    print(f"{metric} t-statistic: {t_stat}, p-value: {p_val}")
-
-    mean_val = np.mean(values)
-    std_dev = np.std(values)
-    
-    # plotting
-    plt.figure(figsize=(10, 5))
-    plt.hist(values, bins=20, color='skyblue', edgecolor='black')
-    plt.title(f"Histogram of {metric}")
-    plt.xlabel(metric)
-    plt.ylabel("Frequency")
-    
-    # mean
-    plt.axvline(x=mean_val, color='r', linestyle='dashed', linewidth=2, label=f"Mean: {mean_val:.2f}")
-    
-    # std
-    plt.axvline(x=mean_val - std_dev, color='g', linestyle='dashed', linewidth=2, label=f"Mean - 1 SD: {mean_val - std_dev:.2f}")
-    plt.axvline(x=mean_val + std_dev, color='b', linestyle='dashed', linewidth=2, label=f"Mean + 1 SD: {mean_val + std_dev:.2f}")
-    
-    plt.legend()
-    plt.grid(True)
-
-
-    plt.savefig(f"GPTR.EWD.F+M(G30){metric}_histogram.png")
 
 
 

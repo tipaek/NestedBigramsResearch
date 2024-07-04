@@ -608,3 +608,80 @@ def NBKL3(file_path, groupLength, eps=1e-9):
     #print('kl divergence finished')
 
     return df
+
+def checkFiles(file_path):
+    metrics = [0]
+    failed_files = []
+    def process_file(file_name, file_path):
+        try:
+            with open(file_path, 'rb') as f:
+                rawdata = f.read()
+                encoding = chardet.detect(rawdata)['encoding']
+                if not encoding:
+                    encoding = 'utf-8'  
+            with open(file_path, 'r', encoding=encoding) as f:
+                code = f.read()
+                code = ''.join([c for c in code if c.isprintable() or c in '\n\r\t '])
+                tree = parse(code)
+        except Exception as e:
+            #print(f'\n\nFailed: {file_name}, {file_path}')
+            failed_files.append(file_name)
+            #traceback.print_exc()
+            metrics[0] += 1
+    def process_directory(dir_path, processed_dirs=set(), processed_files=set()):
+        for root, dirs, files in os.walk(dir_path):
+            for file_name in files:
+                if file_name.endswith('.java'):
+                    file_path = os.path.join(root, file_name)
+                    if os.path.realpath(file_path) not in processed_files:
+                        processed_files.add(os.path.realpath(file_path))
+                        process_file(file_name, file_path)
+            for dir_name in dirs:
+                dir_path = os.path.join(root, dir_name)
+                if os.path.realpath(dir_path) not in processed_dirs:
+                    processed_dirs.add(os.path.realpath(dir_path))
+                    process_directory(dir_path, processed_dirs, processed_files)
+    process_directory(file_path)
+    print(metrics[0])
+    
+def deleteFailedFiles(file_path):
+    failed_files = []
+
+    def process_file(file_name, file_path):
+        try:
+            with open(file_path, 'rb') as f:
+                rawdata = f.read()
+                encoding = chardet.detect(rawdata)['encoding']
+                if not encoding:
+                    encoding = 'utf-8'
+            with open(file_path, 'r', encoding=encoding) as f:
+                code = f.read()
+                code = ''.join([c for c in code if c.isprintable() or c in '\n\r\t '])
+                tree = parse(code)
+        except Exception as e:
+            #print(f'\n\nFailed: {file_name}, {file_path}')
+            print(file_name)
+            failed_files.append(file_path)
+
+    def process_directory(dir_path, processed_dirs=set(), processed_files=set()):
+        for root, dirs, files in os.walk(dir_path):
+            for file_name in files:
+                if file_name.endswith('.java'):
+                    file_path = os.path.join(root, file_name)
+                    if os.path.realpath(file_path) not in processed_files:
+                        processed_files.add(os.path.realpath(file_path))
+                        process_file(file_name, file_path)
+            for dir_name in dirs:
+                dir_path = os.path.join(root, dir_name)
+                if os.path.realpath(dir_path) not in processed_dirs:
+                    processed_dirs.add(os.path.realpath(dir_path))
+                    process_directory(dir_path, processed_dirs, processed_files)
+
+    process_directory(file_path)
+    print("Deleting failed files:")
+    for file in failed_files:
+        try:
+            os.remove(file)
+            #print(f"Deleted: {file}")
+        except Exception as e:
+            print(f"Failed to delete: {file}, Error: {e}")

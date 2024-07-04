@@ -1,0 +1,1 @@
+It appears that the code you provided is not displayed correctly, likely due to encoding issues. Please provide the Java code again, and I'll be happy to help you rewrite it while maintaining its functionality.

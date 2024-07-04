@@ -1,0 +1,1 @@
+It appears that you haven't provided any Java code to rewrite. Could you please provide the Java code that you would like me to rewrite while maintaining its functionality?

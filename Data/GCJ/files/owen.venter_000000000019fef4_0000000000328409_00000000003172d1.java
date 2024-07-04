@@ -1,0 +1,11 @@
+public class Solution(){
+
+System.out.print("Case #1: 2
+Case #2: 0
+Case #3: 1
+Case #4: 1");
+
+
+
+
+}

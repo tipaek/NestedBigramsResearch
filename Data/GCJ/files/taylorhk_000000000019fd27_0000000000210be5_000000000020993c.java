@@ -1,0 +1,1 @@
+System.out.println("Case #1: 4 0 0")

@@ -1,0 +1,2 @@
+name <- readline()
+prompt(name)
