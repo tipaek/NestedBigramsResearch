@@ -28,14 +28,17 @@ sys.path.insert(0, 'C:\\Users\\l-tipaek\Desktop\\Research\\NestedBigramsResearch
 
 
 
-datasets = [r"\NB\Base\GPT.NB.G30.csv", r"\CNB\GPT.CNB.Base.30.csv", r"\NB\EWDBase\GPT.EWD.NB.G30.csv",
-            r"\NB\Transformer\AverageEqualWidth\800\GPT.NB.EqualWidthBinning(average).800.G30.csv", 
-            r"\NB\Base+Transformer\Freq + Average\GPT.NB.EqualWidthBinning(freq+average).3000.4500.G30.csv"]
+# datasets = [r"\NB\Base\GPT.NB.G30.csv", r"\CNB\GPT.CNB.Base.30.csv", r"\NB\EWDBase\GPT.EWD.NB.G30.csv",
+#             r"\NB\Transformer\AverageEqualWidth\800\GPT.NB.EqualWidthBinning(average).800.G30.csv", 
+#             r"\NB\Base+Transformer\Freq + Average\GPT.NB.EqualWidthBinning(freq+average).3000.4500.G30.csv"]
 
-random_states = [i for i in range(100)]
+datasets = [r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\GPT - GCJ\EWD-NB-F\3000\GCJ-GPT.EWD.NB.G30.3000.csv"]
+
+random_states = [i for i in range(20)]
 
 def accuracy_scores(path, states):
-    data = pd.read_csv(r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite" + path)
+    #data = pd.read_csv(r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite" + path)
+    data = pd.read_csv(path)
     print(path)
     drop = ['File Name', 'Written', 'Row Range', 'File Path']
 
@@ -134,7 +137,7 @@ for (i, j, p_val), (_, _, stats_i, stats_j) in zip(p_values, statistics):
 results_df = pd.DataFrame(results)
 
 # Step 6: Save the results to a CSV file
-results_df.to_csv(r't_test_results.csv', index=False)
+results_df.to_csv(r't_test_resultsGCJ.csv', index=False)
 
 
 

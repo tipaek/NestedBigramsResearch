@@ -199,9 +199,9 @@ def encode_nodes_with_BERT(nodes, tokenizer, model, batch_size=100):
 def encode_with_BERT(input_tokens, tokenizer, model):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # if torch.cuda.is_available():
-    #     print('cuda detected')
+    #       print('cuda detected')
     # else:
-    #     print('cuda not detected!')
+    #       print('cuda not detected!')
     model.to(device)
     
     input_string = tokenizer.convert_tokens_to_string(input_tokens)
@@ -218,7 +218,7 @@ def encode_with_BERT(input_tokens, tokenizer, model):
     with torch.no_grad():
         outputs = model(input_ids)
         embs = outputs.last_hidden_state[:, 0, :].cpu().numpy()
-    
+    # print(input_string)
     return(input_string, embs)
     
     

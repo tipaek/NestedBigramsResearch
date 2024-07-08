@@ -46,15 +46,15 @@ columns = ['Group Size',
            'RF AUC', 'RF F-1 Score', 'RF Accuracy', 'RF Precision']
 
 
-#group_sizes = [10, 20, 30, 40, 50, 60, 70]
+group_sizes = [10, 20, 30, 40, 50, 60, 70]
 
 #group_sizes = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
-group_sizes = [500, 1000, 2000, 3000, 4000, 5000]
-#paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\NB\Base\GPT.NB.Base"]
+##paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\NB\Base\GPT.NB.Base"]
 #paths = [r"C:\Users\tipaek\OneDrive - Syracuse University\Desktop\Research\NestedBigramsResearch\Datasets\40Authors\CNB\40.CNB"]
 #paths = [r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\CNB\EqualWidthBinning\AverageCLS\40\GPT.EqualWidthBinning(average)"]
 #paths = [r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\40Authors\EqualWidthBinning\NB Average + Freq\Optimized\40.NB.EqualWidthBinning(average+freq)"]
-paths = [r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\GPT - GCJ\EWD-NB-F\width test"]
+#paths = [r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\GPT - GCJ\EWD-NB-F\width test"]
+paths = [r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\GPT - GCJ\EWD-NB-F\3000"]
 testing_data = []
 #paths = [r"C:\Users\l-tipaek\Desktop\Research\NestedBigramsResearch\Datasets\GPT - Rewrite\CNB + NB\EqualWidthBinning\(3000)\GPT.CNB+NB.EqualWidthBinning.3000.G30.csv"]
 
@@ -65,12 +65,12 @@ experiment = Experiment(
 )
 # experiment.add_tags(["GPT - Rewrite, NB Mean Squared Average + Freq", "GPT - Rewrite", "NB Average Cls + Freq", "ensembles", "Equal Width Binning", "Test Seeds"])
 # experiment.add_tags(["40 Authors, NB Average+freq", "40 Authors", "ensembles", "NB Average+freq"])
-experiment.add_tags(["GPT GCJ", "EWD NB Width"])
+experiment.add_tags(["GPT GCJ", "EWD NB-F", "Width 3000"])
 
 for path in paths:
     for size in group_sizes:
         #curr_path = f'{path}.600.2000.G{size}.csv'
-        curr_path = f"{path}\GCJ-GPT.EWD.NB.G30.{size}.csv"
+        curr_path = f"{path}\GCJ-GPT.EWD.NB.G{size}.3000.csv"
         print(f'\nPATH: {curr_path}')
         print(size)
         
@@ -133,13 +133,13 @@ for path in paths:
             testing_data.append([roc_auc, f1, accuracy, precision])
      
             experiment.log_metrics({
-                "group_size": 30,
+                "group_size": size,
                 "dimensions": X.shape[1],
                 "gcj.roc_auc": roc_auc, #metrics
                 "gcj.f1": f1,
                 "gcj.accuracy": accuracy,
                 "gcj.precision": precision,
-                "width": size,
+                "width": 3000,
                 "clf": clf_name,
                 "random_seed": 42
                 })

@@ -288,32 +288,32 @@ def extract_features_with_equalWidthBinning(file_path, groupLength, bin_size, ep
                     features = get_bigrams(tree, start_line, end_line)
                     #features = get_bigrams_nonverbose(tree, start_line, end_line)
                 
-                # FOR STANDARD
-                for feature in features:
-                    str_feature = str(feature)
-                    if feature_dict.get(str_feature) == None:
-                        feature_dict[str_feature] = index_numRows_divider[0]
-                        index_numRows_divider[0] += 1
-                
-                # # FOR TRANSFORMERS
+                # # FOR STANDARD
                 # for feature in features:
                 #     str_feature = str(feature)
-                #     tokens = tokenizer.tokenize(str_feature)
-                #     num_groups = math.ceil(len(tokens) / 512)
+                #     if feature_dict.get(str_feature) == None:
+                #         feature_dict[str_feature] = index_numRows_divider[0]
+                #         index_numRows_divider[0] += 1
+                
+                # FOR TRANSFORMERS
+                for feature in features:
+                    str_feature = str(feature)
+                    tokens = tokenizer.tokenize(str_feature)
+                    num_groups = math.ceil(len(tokens) / 512)
                     
-                #     token_groups = [tokens[z * 512: (z+1) * 512] for z in range(num_groups)]
-                #     for token_group in token_groups:
-                #         str_token_group = tokenizer.convert_tokens_to_string(token_group)
-                #         if feature_dict.get(str_token_group) == None:
+                    token_groups = [tokens[z * 512: (z+1) * 512] for z in range(num_groups)]
+                    for token_group in token_groups:
+                        str_token_group = tokenizer.convert_tokens_to_string(token_group)
+                        if feature_dict.get(str_token_group) == None:
                             
-                #             # # FOR ALL VALUES
-                #             # for index in range(768):
-                #             #     feature_dict[str_token_group+str(index)] = index_numRows_divider[0]
-                #             #     index_numRows_divider[0] += 1
+                            # # FOR ALL VALUES
+                            # for index in range(768):
+                            #     feature_dict[str_token_group+str(index)] = index_numRows_divider[0]
+                            #     index_numRows_divider[0] += 1
                             
-                #             # FOR STANDARD
-                #             feature_dict[str_token_group] = index_numRows_divider[0]
-                #             index_numRows_divider[0] += 1
+                            # FOR STANDARD
+                            feature_dict[str_token_group] = index_numRows_divider[0]
+                            index_numRows_divider[0] += 1
         
                 
                 code_group_lengths.append(len(code_group))
@@ -338,8 +338,8 @@ def extract_features_with_equalWidthBinning(file_path, groupLength, bin_size, ep
                     features = get_bigrams(tree, start_line, end_line)
                     #features = get_bigrams_nonverbose(tree, start_line, end_line)
                     
-                    feature_freqs = bigram_freq(features, None)
-                    #feature_freqs = feature_cls(features, tokenizer, model, feature_dict, 'absolute')
+                    #feature_freqs = bigram_freq(features, None)
+                    feature_freqs = feature_cls(features, tokenizer, model, feature_dict, 'absolute')
                     if len(code_string) != 0:
                         initial_features = get_features(code_string)
                     else:
