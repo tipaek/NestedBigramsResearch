@@ -1,6 +1,6 @@
 # Detection of LLM-Generated Java Code Using Discretized Nested Bigrams
 
-[![Chat-GPT-Image-May-15-2025-01-28-42-PM.png](https://i.postimg.cc/3JzfRQSS/Chat-GPT-Image-May-15-2025-01-28-42-PM.png)](https://postimg.cc/MvbmPN8V)
+[![Chat-GPT-Image-May-15-2025-01-35-47-PM.png](https://i.postimg.cc/6QZ8Xn7b/Chat-GPT-Image-May-15-2025-01-35-47-PM.png)](https://postimg.cc/Y4prN4zQ)
 
 [![arXiv](https://img.shields.io/badge/arXiv-2502.15740-b31b1b.svg)](https://arxiv.org/abs/2502.15740)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
